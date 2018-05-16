@@ -7,6 +7,7 @@ using Microsoft.Extensions.DependencyInjection;
 using mytrade.Data;
 using mytrade.Models;
 using mytrade.Services;
+using System.Security.Claims;
 
 namespace mytrade
 {
@@ -25,7 +26,14 @@ namespace mytrade
             services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
 
-            services.AddIdentity<ApplicationUser, IdentityRole>()
+            services.AddIdentity<ApplicationUser, IdentityRole>(o =>
+            {
+                o.Password.RequireDigit = false;
+                o.Password.RequireLowercase = false;
+                o.Password.RequireUppercase = false;
+                o.Password.RequireNonAlphanumeric = false;
+                o.Password.RequiredLength = 6;
+            })
                 .AddEntityFrameworkStores<ApplicationDbContext>()
                 .AddDefaultTokenProviders();
 
@@ -33,6 +41,13 @@ namespace mytrade
             services.AddTransient<IEmailSender, EmailSender>();
 
             services.AddMvc();
+
+            services.AddAuthorization(options =>
+            {
+                options.AddPolicy("admin", policy => policy.RequireClaim(ClaimTypes.Role, "admin"));
+                options.AddPolicy("tm", policy => policy.RequireClaim(ClaimTypes.Role, "tm"));
+                options.AddPolicy("client", policy => policy.RequireClaim(ClaimTypes.Role, "client"));
+            });            
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

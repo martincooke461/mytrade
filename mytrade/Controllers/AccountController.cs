@@ -65,7 +65,8 @@ namespace mytrade.Controllers
                 if (result.Succeeded)
                 {
                     _logger.LogInformation("User logged in.");
-                    return RedirectToLocal(returnUrl);
+                    //return RedirectToLocal(returnUrl);
+                    return Redirect("~/Landing/Index");
                 }
                 if (result.RequiresTwoFactor)
                 {
@@ -224,6 +225,15 @@ namespace mytrade.Controllers
                 var result = await _userManager.CreateAsync(user, model.Password);
                 if (result.Succeeded)
                 {
+                    if (model.IsTM)
+                    {
+                        await _userManager.AddClaimAsync(user, new Claim(ClaimTypes.Role, "tm"));
+                    }
+                    else
+                    {
+                        await _userManager.AddClaimAsync(user, new Claim(ClaimTypes.Role, "client"));
+                    }
+
                     _logger.LogInformation("User created a new account with password.");
 
                     var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
@@ -232,7 +242,8 @@ namespace mytrade.Controllers
 
                     await _signInManager.SignInAsync(user, isPersistent: false);
                     _logger.LogInformation("User created a new account with password.");
-                    return RedirectToLocal(returnUrl);
+                    //return RedirectToLocal(returnUrl);
+                    return Redirect("~/Landing/Index");
                 }
                 AddErrors(result);
             }
