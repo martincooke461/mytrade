@@ -5,11 +5,19 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using mytrade.Models;
+using Microsoft.Extensions.Configuration;
 
 namespace mytrade.Controllers
 {
     public class HomeController : Controller
     {
+        IConfiguration _configration;
+
+        public HomeController(IConfiguration configuration)
+        {
+            _configration = configuration;
+        }
+
         public IActionResult Index()
         {
             return View();
